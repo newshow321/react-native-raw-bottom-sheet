@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: "#00000077"
+    backgroundColor: "rgba(47, 60, 101, 0.5)"
   },
   mask: {
     flex: 1,

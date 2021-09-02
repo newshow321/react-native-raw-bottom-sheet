@@ -10,6 +10,7 @@ import {
   Platform
 } from "react-native";
 import styles from "./style";
+import * as Animate from 'react-native-animatable';
 
 const SUPPORTED_ORIENTATIONS = [
   "portrait",
@@ -25,7 +26,8 @@ class RBSheet extends Component {
     this.state = {
       modalVisible: false,
       animatedHeight: new Animated.Value(0),
-      pan: new Animated.ValueXY()
+      pan: new Animated.ValueXY(),
+      myAnimation: 'slideInDown',
     };
 
     this.createPanResponder(props);
@@ -80,11 +82,16 @@ class RBSheet extends Component {
   }
 
   open(props) {
+    this.setState({ myAnimation: 'slideInUp' });
     this.setModalVisible(true, props);
   }
 
   close(props) {
-    this.setModalVisible(false, props);
+    this.setState({ myAnimation: 'slideOutDown' });
+    let now = this;
+    setTimeout(function () {
+      now.setModalVisible(false, props);
+    }, 200);
   }
 
   render() {
@@ -98,7 +105,7 @@ class RBSheet extends Component {
       customStyles,
       keyboardAvoidingViewEnabled
     } = this.props;
-    const { animatedHeight, pan, modalVisible } = this.state;
+    const { animatedHeight, pan, modalVisible, myAnimation } = this.state;
     const panStyle = {
       transform: pan.getTranslateTransform()
     };
@@ -114,29 +121,33 @@ class RBSheet extends Component {
         }}
       >
         <KeyboardAvoidingView
-          enabled={keyboardAvoidingViewEnabled}
-          behavior="padding"
-          style={[styles.wrapper, customStyles.wrapper]}
+            enabled={keyboardAvoidingViewEnabled}
+            behavior="padding"
+            style={[styles.wrapper, customStyles.wrapper]}
         >
           <TouchableOpacity
-            style={styles.mask}
-            activeOpacity={1}
-            onPress={() => (closeOnPressMask ? this.close() : null)}
+              style={styles.mask}
+              activeOpacity={1}
+              onPress={() => (closeOnPressMask ? this.close() : null)}
           />
-          <Animated.View
-            {...(!dragFromTopOnly && this.panResponder.panHandlers)}
-            style={[panStyle, styles.container, { height: animatedHeight }, customStyles.container]}
-          >
-            {closeOnDragDown && (
-              <View
-                {...(dragFromTopOnly && this.panResponder.panHandlers)}
-                style={styles.draggableContainer}
-              >
-                <View style={[styles.draggableIcon, customStyles.draggableIcon]} />
-              </View>
-            )}
-            {children}
-          </Animated.View>
+          <Animate.View
+              animation={myAnimation}
+              duration={800} style={customStyles.container}>
+            <Animated.View
+                {...(!dragFromTopOnly && this.panResponder.panHandlers)}
+                style={[panStyle, styles.container, { height: animatedHeight }, customStyles.container]}
+            >
+              {closeOnDragDown && (
+                  <View
+                      {...(dragFromTopOnly && this.panResponder.panHandlers)}
+                      style={styles.draggableContainer}
+                  >
+                    <View style={[styles.draggableIcon, customStyles.draggableIcon]} />
+                  </View>
+              )}
+              {children}
+            </Animated.View>
+          </Animate.View>
         </KeyboardAvoidingView>
       </Modal>
     );
